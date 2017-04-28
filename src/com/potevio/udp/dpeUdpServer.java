@@ -41,10 +41,10 @@ public class dpeUdpServer extends dpeSocketBase {
 
     }
 
-    public void closeUdpServer()
+    /*public void closeUdpServer()
     {
         socketFlag = SOCKET_CLOSED;
-    }
+    }*/
 
     @Override
     public void run()
@@ -77,5 +77,20 @@ public class dpeUdpServer extends dpeSocketBase {
 
         }
         logger.debug("udpserver is terminated.");
+    }
+
+    public static void main(String[] args)
+    {
+        dpeUdpServer udpServer = new dpeUdpServer();
+        Thread test = new Thread(udpServer);
+        test.start();
+        try
+        {
+            test.join();
+        }catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+
     }
 }

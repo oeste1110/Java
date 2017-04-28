@@ -14,6 +14,7 @@ public class dpeUdpHandler implements Runnable {
     private handlerInterface hInterface;
     private BlockingQueue<DatagramPacket> dataQueue;
     private static Logger logger;
+    private dpeUdpClient udpClient = new dpeUdpClient();
 
     public dpeUdpHandler(BlockingQueue<DatagramPacket> queue,handlerInterface callback)
     {
@@ -25,6 +26,10 @@ public class dpeUdpHandler implements Runnable {
     @Override
     public void run() {
         logger.debug("start udphandler thread.");
+       // udpClient.setQueue(dataQueue);
+        Thread testThread = new Thread(udpClient);
+        testThread.start();
+
         while(hInterface.handlerCallback() == SOCKET_RUNNING)
         {
             try{
@@ -41,6 +46,14 @@ public class dpeUdpHandler implements Runnable {
 
     private void processUdpPacketData(DatagramPacket packet)
     {
+        try
+        {
+            packet.setPort(12744);
+            udpClient.addMsg(packet);
+        }catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
 
     }
 }

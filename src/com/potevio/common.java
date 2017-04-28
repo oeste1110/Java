@@ -9,7 +9,16 @@ public interface common {
         UNINITIALED,
         HTTP_SERVER_STARTFAIL,
         HTTP_URL_WRONGTYPE,
-        HTTP_CLIENT_POSTFAIL
+        HTTP_CLIENT_POSTFAIL,
+        POOL_IS_FULL
+    }
+
+    public enum maintenanceInfo
+    {
+        DIRECTION_UP,
+        DIRECTION_DOWN,
+        SOURCE_INNER,
+        SOURCE_OUTTER
     }
 
     public final static String SERVER_BINDADDR = "10.3.19.22";
@@ -33,5 +42,6 @@ public interface common {
     public final static int SOCKET_SLEEP_TIME = 10;
     public final static int TIMER_DEGREE = 1000;
     public final static int HTTPSERVER_CLOSE_DELAYTIME = 5;
+    public final static int POOL_MAX_TASKNUM = 15;
 
 }

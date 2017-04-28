@@ -1,28 +1,67 @@
 package com.potevio.dao.main;
 
 import com.potevio.dao.bean.News;
+import com.potevio.dao.bean.Testtable1Entity;
 import com.potevio.dao.bean.User;
 import org.hibernate.*;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.apache.log4j.Logger;
+import org.hibernate.criterion.Order;
+import org.hibernate.service.ServiceRegistry;
+
+import java.util.List;
 
 
-public class SagDbManager {  
-	
-	
-	private SessionFactory sFactory;
+public class SagDbManager {
+	private static SessionFactory sFactory;
 	private static boolean isInitialed = false;
 	private static boolean ifExistsSession = false;
 	private SagSession sagSession = null;
 	private static Logger logger;
+    private static volatile SagDbManager sDbm;
 
 	private SagDbManager(){
 		logger= Logger.getLogger(SagDbManager.class);
-		sFactory = new Configuration().configure().buildSessionFactory();
+		Configuration configuration = new Configuration().configure();
+        ServiceRegistry registry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();
+		sFactory = configuration.buildSessionFactory(registry);
 	};
-	
-	private static volatile SagDbManager sDbm;
-  
+
+	public class SagDbQuery
+	{
+		private Criteria criteria;
+
+		public SagDbQuery(Class<?> classobj)
+		{
+            if(null!=sagSession)
+            {
+               criteria = sagSession.getSession().createCriteria(classobj);
+            }
+		}
+
+		public void addCondititon(QueryCondition queryCondition)
+		{
+            criteria.add(queryCondition.getCriterion());
+		}
+
+		public void descOrder(String name)
+        {
+            criteria.addOrder(Order.desc(name));
+        }
+
+        public List getQueryList()
+        {
+            return criteria.list();
+        }
+	}
+
+    public SagDbQuery getQuery(Class<?> classobj)
+    {
+        return new SagDbQuery(classobj);
+    }
+
+
 	public static SagDbManager getDbManager()
 	{
 		if(sDbm == null)
@@ -53,7 +92,7 @@ public class SagDbManager {
 		sagSession = null;
 	}
 	
-	public void insertItem(Object obj)
+	public void insert(Object obj)
 	{
 		if(ifExistsSession)
 		{
@@ -62,23 +101,30 @@ public class SagDbManager {
 		//todo throw exception
 	}
 	
-	/*public void insertItemArray(ArrayList objlist)
+	public void insertMany(List objlist)
 	{
 		if(ifExistsSession)
 		{
-			objlist.forEach((Object obj)->{insertItem(obj)});
+			objlist.forEach((Object obj)->insert(obj));
 		}
-	}*/
+	}
 	
+	public void update(Object obj)
+    {
+        if(ifExistsSession)
+        {
+            sagSession.updateItem(obj);
+        }
+    }
 	
-	
-	//delete
-	//update
-	//query
-	/*public Criteria getQueryCrit(Class classobj)
-	{
-		Criteria crit = sagSession.createCriteria
-	}*/
+	public void delete(Object obj)
+    {
+        if(ifExistsSession)
+        {
+            sagSession.deleteItem(obj);
+        }
+    }
+
 	
     public static void main(String[] args) {
         SagDbManager sdbm  = SagDbManager.getDbManager();
@@ -99,22 +145,27 @@ public class SagDbManager {
             session.save(user);
             tx.commit();  
             session.close();*/
-        	User user = new User();
+        	/*User user = new User();
             user.setName("sy1113");
             user.setPassword("1234");
             News news = new News();
             news.setTitle("title test5.");
             news.setContent("content test5.");
             sdbm.createSession();
-        	sdbm.insertItem(user);
-        	sdbm.insertItem(news);
-        	
+        	sdbm.insert(user);
+        	sdbm.insert(news);*/
+
+            sdbm.createSession();
+            QueryCondition qc = new QueryCondition();
+            qc.equal("param2","test2");
+            SagDbQuery query = sdbm.getQuery(Testtable1Entity.class);
+            query.addCondititon(qc);
+            List<News> result = query.getQueryList();
+            result.forEach((News news)->System.out.println(news.getTitle()+news.getContent()));
         	
         } catch (HibernateException e) {  
             e.printStackTrace();  
         }
-        finally {
-            sdbm.commitSession();
-        }
+
     }  
 }  

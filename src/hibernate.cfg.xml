@@ -5,22 +5,7 @@
 <hibernate-configuration>
   <session-factory>
 
-
-    <!-- 配置hibernate的基本信息 -->
-      <property name="connection.url">jdbc:mysql://localhost:3306/hibernate_test</property>
-      <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-      <property name="connection.username">oeste</property>
-      <property name="connection.password">huangdong</property>
-
-    <!-- 配置数据库方言dialect -->
-      <property name="dialect">org.hibernate.dialect.MySQL5InnoDBDialect</property>
-
-    <!-- DB schema will be updated if needed -->
-    <!-- <property name="hbm2ddl.auto">update</property> -->
-      <mapping resource="com/potevio/dao/bean/News.hbm.xml"/>
-      <mapping resource="com/potevio/dao/bean/User.hbm.xml"/>
-
-    <!-- c3p0配置 -->
+      <!-- c3p0配置 -->
       <property name="hibernate.connection.provider_class">org.hibernate.c3p0.internal.C3P0ConnectionProvider</property>
       <property name="hibernate.c3p0.max_size">20</property>
       <property name="hibernate.c3p0.min_size">5</property>
@@ -33,5 +18,21 @@
       <property name="c3p0.idleConnectionTestPeriod">18000</property>
       <property name="c3p0.maxIdleTime">25000</property>
       <property name="c3p0.idle_test_period">120</property>
+
+      <!-- 配置hibernate的基本信息 -->
+      <property name="connection.url">jdbc:mysql://localhost:3306/hibernate_test</property>
+      <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+      <property name="connection.username">root</property>
+      <property name="connection.password">huang123</property>
+
+      <!-- 配置数据库方言dialect -->
+      <property name="dialect">org.hibernate.dialect.MySQL5InnoDBDialect</property>
+
+      <mapping class="com.potevio.dao.bean.Testtable1Entity"/>
+      <mapping class="com.potevio.dao.bean.Testtable2Entity"/>
+
+
+
+
   </session-factory>
 </hibernate-configuration>

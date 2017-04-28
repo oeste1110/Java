@@ -1,11 +1,11 @@
 package com.potevio.http;
 
 import com.potevio.common;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpRequest;
+import net.sf.json.JSONObject;
+import org.apache.http.*;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -15,6 +15,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 
@@ -23,6 +25,8 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.potevio.common.returnInfo.HTTP_CLIENT_POSTFAIL;
 import static com.potevio.common.returnInfo.HTTP_URL_WRONGTYPE;
@@ -48,6 +52,9 @@ public class dpeHttpClient implements Runnable{
         httpClientConnectionManager = new PoolingHttpClientConnectionManager();
         //设置连接池最大数量
         httpClientConnectionManager.setMaxTotal(common.CLIENT_MAX_CONNUM);
+       // HttpHost host = new HttpHost("http://10.3.19.17:8080");
+       // SocketConfig config = SocketConfig.custom().build();
+       // httpClientConnectionManager.setSocketConfig(host,config);
         //设置单个路由最大连接数量
         httpClientConnectionManager.setDefaultMaxPerRoute(common.CLIENT_MAX_CONNUM_PERROUTE);
         logger.debug("HttpClient init success.");
@@ -103,7 +110,7 @@ public class dpeHttpClient implements Runnable{
                                     .build();
     }
 
-    public common.returnInfo sendPost(String url, String msgbody)
+    public common.returnInfo sendPost(String url, /*String msgbody*/List<NameValuePair> msgpairs)
     {
         if(url == null || !url.startsWith("http")||url.isEmpty())
         {
@@ -117,12 +124,17 @@ public class dpeHttpClient implements Runnable{
         String urltrim = url.trim();
         try
         {
-            URL posturl = new URL(urltrim);
-            URI posturi = new URI(posturl.getProtocol(),posturl.getHost(),posturl.getPath(),posturl.getQuery(),null);
+           // URL posturl = new URL(urltrim);
+          //  URI posturi = new URI(posturl.getProtocol(),posturl.getHost(),posturl.getPath(),posturl.getQuery(),null);
+            URI posturi = new URI(urltrim);
+            String dmsg = String.format("Posturl:%d",posturi.getPort());
+            logger.debug(dmsg);
             httppost = new HttpPost(posturi);
-            StringEntity msgBody = new StringEntity(msgbody);
+           // StringEntity msgBody = new StringEntity(msgbody);
+            UrlEncodedFormEntity msgBody = new UrlEncodedFormEntity(msgpairs);
             httppost.setEntity(msgBody);
-        }catch(MalformedURLException|URISyntaxException|UnsupportedEncodingException e)
+
+        }catch(/*MalformedURLException|*/URISyntaxException|UnsupportedEncodingException e)
         {
             e.printStackTrace();
             logger.error("build post error",e);
@@ -138,14 +150,20 @@ public class dpeHttpClient implements Runnable{
             logger.error("post data error",e);
             return HTTP_CLIENT_POSTFAIL;
         }
-
+        logger.debug("post data success");
         return dealResponse(response);
     }
 
     @Override
     public void run()
     {
+        initHttpClient();
 
+    }
+
+    public void close()
+    {
+        httpClientConnectionManager.close();
     }
 
     private void addReqHeader(HttpPost httppost)
@@ -153,6 +171,7 @@ public class dpeHttpClient implements Runnable{
         httppost.addHeader("Accept","*/*");
         httppost.addHeader("Connection","keep-alive");
         httppost.addHeader("Accept-Encoding","gzip, deflate");
+        httppost.addHeader("Content-Type","application/x-www-form-urlencoded");
     }
 
 
@@ -163,12 +182,35 @@ public class dpeHttpClient implements Runnable{
         switch (statusCode)
         {
             case 200:
-                HttpEntity entity = response.getEntity();
-                
-            case 400:
+                //HttpEntity entity = response.getEntity();
+                break;
+            case 404:
+            case 502:
+                break;
             default:
                 break;
         }
         return SUCCESS;
+    }
+
+    public static void main(String[] args)
+    {
+        String url = "http://10.3.19.17:8080/SagTest/DpeClient";
+        dpeHttpClient httpClient = dpeHttpClient.getClientInstance();
+        httpClient.initHttpClient();
+        JSONObject postData = new JSONObject();
+        postData.put("result1","test1");
+        postData.put("result2","test2");
+
+        //common.returnInfo ret = httpClient.sendPost(url,postData.toString());
+        List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+        NameValuePair pair1 = new BasicNameValuePair("test1", "value1");
+        NameValuePair pair2 = new BasicNameValuePair("test2", "value2");
+        NameValuePair pair3 = new BasicNameValuePair("test3", "value3");
+        pairs.add(pair1);
+        pairs.add(pair2);
+        pairs.add(pair3);
+        common.returnInfo ret = httpClient.sendPost(url,pairs);
+
     }
 }

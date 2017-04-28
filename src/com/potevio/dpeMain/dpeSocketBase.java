@@ -45,9 +45,19 @@ public class dpeSocketBase implements Runnable {
         dataQueue.put(packet);
     }
 
+   /* public BlockingQueue<DatagramPacket> getDataQueue()
+    {
+        return dataQueue;
+    }*/
+
     protected DatagramPacket getMsg() throws InterruptedException
     {
         return dataQueue.take();
+    }
+
+    public void close()
+    {
+        socketFlag = SOCKET_CLOSED;
     }
 
     @Override

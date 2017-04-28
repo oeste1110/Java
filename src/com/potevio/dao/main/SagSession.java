@@ -10,7 +10,7 @@ public class SagSession {
 	private Session sagSession = null;
 	private boolean isClosed = true;
 	private Transaction sagTranc = null;
-	private static Logger logger;
+	private static Logger logger = Logger.getLogger(SagSession.class);;
 
 	public SagSession(Session session)
 	{
@@ -38,12 +38,27 @@ public class SagSession {
 		Criteria criteria = sagSession.createCriteria("fdasf");
 		
 	}*/
-	
+
+	public Session getSession()
+	{
+		return this.sagSession;
+	}
+
 	public void insertItem(Object object)
 	{
 		sagSession.save(object);
 	}
-	
+
+    public void updateItem(Object object)
+    {
+        sagSession.update(object);
+    }
+
+    public void deleteItem(Object obj)
+    {
+        sagSession.delete(obj);
+    }
+
 	public void finalize()
 	{
 		if(!isClosed)

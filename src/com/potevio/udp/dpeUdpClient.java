@@ -8,6 +8,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.concurrent.BlockingQueue;
 
 import static com.potevio.common.*;
 import static java.lang.Thread.sleep;
@@ -43,10 +44,14 @@ public class dpeUdpClient extends dpeSocketBase {
         isInitialed = true;
     }
 
-    public void stopClient()
+    public void setQueue(BlockingQueue<DatagramPacket> queue)
+    {
+        dataQueue = queue;
+    }
+   /* public void stopClient()
     {
         socketFlag = SOCKET_CLOSED;
-    }
+    }*/
 
     @Override
     public void run()
@@ -58,6 +63,7 @@ public class dpeUdpClient extends dpeSocketBase {
         }
         logger.debug("udpclient is started.");
         DatagramPacket dataPacketBody = null;
+        socketFlag = SOCKET_RUNNING;
         while(SOCKET_RUNNING == socketFlag)
         {
             if(!dataQueue.isEmpty())
@@ -65,7 +71,7 @@ public class dpeUdpClient extends dpeSocketBase {
                 try
                 {
                     dataPacketBody = dataQueue.take();
-                    dataPacketBody.setAddress(InetAddress.getByName(SAGMAINTAINENCE_ADDR));
+                  //  dataPacketBody.setAddress(InetAddress.getByName(SAGMAINTAINENCE_ADDR));
                     dataPacketBody.setPort(SAGMAINTAINENCE_PORTNUM);
                     String dmsg = "send udp data to "+dataPacketBody.getAddress().toString()+":"+dataPacketBody.getPort();
                     logger.debug(dmsg);
