@@ -28,9 +28,11 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.potevio.common.returnInfo.HTTP_CLIENT_POSTFAIL;
-import static com.potevio.common.returnInfo.HTTP_URL_WRONGTYPE;
-import static com.potevio.common.returnInfo.SUCCESS;
+import static com.potevio.common.HTTP_OK;
+import static com.potevio.common.HTTP_BADGATEWAY;
+import static com.potevio.common.HTTP_NOTFOUND;
+import static com.potevio.common.returnInfo.*;
+
 
 /**
  * Created by hdlsy on 2017/4/5.
@@ -181,14 +183,18 @@ public class dpeHttpClient implements Runnable{
         int statusCode = response.getStatusLine().getStatusCode();
         switch (statusCode)
         {
-            case 200:
+            case HTTP_OK:
                 //HttpEntity entity = response.getEntity();
+                logger.info("web server received.");
                 break;
-            case 404:
-            case 502:
-                break;
+            case HTTP_NOTFOUND:
+                logger.error("can not contact with web server.");
+                return HTTP_WEBSERVER_NOTFOUND;
+            case HTTP_BADGATEWAY:
+                logger.error("web server badgateway.");
+                return HTTP_WEBSERVER_BADGATEWAY;
             default:
-                break;
+                return HTTP_WEBSERVER_UNKNOWNRESPONSE;
         }
         return SUCCESS;
     }

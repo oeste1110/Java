@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import com.potevio.dpeMain.dpeSocketBase;
+import org.apache.http.NameValuePair;
 import org.apache.log4j.Logger;
 
 import static com.potevio.common.*;
@@ -17,6 +20,7 @@ import static java.lang.Thread.sleep;
 public class dpeUdpServer extends dpeSocketBase {
     private DatagramSocket udpServer;
     private boolean isInitialed = false;
+    private BlockingQueue<List<NameValuePair>> udpToHttpQueue;
     private static Logger logger = Logger.getLogger(dpeUdpServer.class);
 
     byte[] receiveBuffer = new byte[UDPSOCKET_RECVBUFFER_SIZE];
@@ -27,6 +31,11 @@ public class dpeUdpServer extends dpeSocketBase {
         setAutoCloseTime(SOCKET_NEVER_AUTOCLOSED);
         initUdpServer();
     };
+
+    public void setUdpToHttpQueue(BlockingQueue< List<NameValuePair>> queue)
+    {
+        this.udpToHttpQueue = queue;
+    }
 
     private void initUdpServer()
     {
@@ -55,7 +64,9 @@ public class dpeUdpServer extends dpeSocketBase {
             return;
         }
         socketFlag = SOCKET_RUNNING;
-        Thread workhandler = new Thread(new dpeUdpHandler(dataQueue,()-> getSocketFlag()));
+        dpeUdpHandler udpHandler = new dpeUdpHandler(dataQueue,()-> getSocketFlag());
+        udpHandler.setUdpToHttpQueue(udpToHttpQueue);
+        Thread workhandler = new Thread(udpHandler);
         workhandler.start();
         logger.debug("udpserver start.");
         while(SOCKET_RUNNING ==socketFlag)

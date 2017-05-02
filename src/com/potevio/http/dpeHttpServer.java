@@ -5,7 +5,9 @@ import com.sun.net.httpserver.HttpServer;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 
 import static com.potevio.common.HTTPSERVER_CLOSE_DELAYTIME;
@@ -18,18 +20,19 @@ public class dpeHttpServer implements Runnable{
     private final static dpeHttpServer dpeServer = new dpeHttpServer();
     private static HttpServer httpServer = null;
     private static boolean stopFlag = false;
+
    // private final static String bindAddr = "127.0.0.1";
     //private final static int portNum = 12744;
     //private final static int maxConNum = 10;
     private common.returnInfo serverStatus = common.returnInfo.UNINITIALED;
-    private Logger logger;
+    private Logger logger = Logger.getLogger(dpeHttpServer.class);
 
     private dpeHttpServer(){
-        logger = Logger.getLogger(dpeHttpServer.class);
-        startHttpServer();
+        //logger = ;
+        //startHttpServer();
     };
 
-    public void startHttpServer()
+    public void startHttpServer(BlockingQueue<DatagramPacket> queue)
     {
         if(httpServer != null)
         {
@@ -37,8 +40,10 @@ public class dpeHttpServer implements Runnable{
             httpServer = null;
         }
         try {
+            dpeHttpHandler handler = new dpeHttpHandler();
+            handler.setHttpToUdpQueue(queue);
             httpServer = HttpServer.create(new InetSocketAddress(common.SERVER_BINDADDR, common.SERVER_PORTNUM), common.SERVER_MAX_CONNUM);
-            httpServer.createContext(dpeHttpHandler.dpehandlerContext,new dpeHttpHandler());
+            httpServer.createContext(dpeHttpHandler.dpehandlerContext,handler);
             httpServer.setExecutor(Executors.newCachedThreadPool());
             httpServer.start();
             logger.info("HttpServer start.");
@@ -50,6 +55,7 @@ public class dpeHttpServer implements Runnable{
         }
         serverStatus = common.returnInfo.SUCCESS;
     }
+
 
     public static dpeHttpServer getServerInstance()
     {
@@ -71,7 +77,7 @@ public class dpeHttpServer implements Runnable{
     @Override
     public void run()
     {
-        startHttpServer();
+        //startHttpServer();
         while(!stopFlag)
         {
             try

@@ -10,7 +10,10 @@ public interface common {
         HTTP_SERVER_STARTFAIL,
         HTTP_URL_WRONGTYPE,
         HTTP_CLIENT_POSTFAIL,
-        POOL_IS_FULL
+        POOL_IS_FULL,
+        HTTP_WEBSERVER_NOTFOUND,
+        HTTP_WEBSERVER_BADGATEWAY,
+        HTTP_WEBSERVER_UNKNOWNRESPONSE
     }
 
     public enum maintenanceInfo
@@ -21,8 +24,10 @@ public interface common {
         SOURCE_OUTTER
     }
 
+    public final static int BITS_PER_BYTES = 8;
     public final static String SERVER_BINDADDR = "10.3.19.22";
     public final static String SAGMAINTAINENCE_ADDR = "127.0.0.1";
+    public final static String WEBSERVER_ACTIONNAME = "http://10.3.19.17:8080/SagTest/DpeClient";
     public final static int SOCKET_CLOSED = 0;
     public final static int SOCKET_RUNNING = 1;
     public final static int SERVER_PORTNUM = 12744;
@@ -43,5 +48,9 @@ public interface common {
     public final static int TIMER_DEGREE = 1000;
     public final static int HTTPSERVER_CLOSE_DELAYTIME = 5;
     public final static int POOL_MAX_TASKNUM = 15;
-
+    public final static int HTTP_OK = 200;
+    public final static int HTTP_NOTFOUND = 404;
+    public final static int HTTP_BADGATEWAY = 502;
+    public final static int HTTP_UDP_QUEUE_SIZE = 100;
+    public final static int UDP_HTTP_QUEUE_SIZE = 100;
 }

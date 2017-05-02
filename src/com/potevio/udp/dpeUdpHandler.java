@@ -1,7 +1,11 @@
 package com.potevio.udp;
 
 import java.net.DatagramPacket;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
+
+import com.potevio.parser.dpeSagmParser;
+import org.apache.http.NameValuePair;
 import org.apache.log4j.Logger;
 
 import static com.potevio.common.SOCKET_RUNNING;
@@ -13,6 +17,7 @@ public class dpeUdpHandler implements Runnable {
 
     private handlerInterface hInterface;
     private BlockingQueue<DatagramPacket> dataQueue;
+    private BlockingQueue<List<NameValuePair>> udpToHttpQueue;
     private static Logger logger;
     private dpeUdpClient udpClient = new dpeUdpClient();
 
@@ -21,6 +26,11 @@ public class dpeUdpHandler implements Runnable {
         hInterface = callback;
         dataQueue = queue;
         logger = Logger.getLogger(dpeUdpHandler.class);
+    }
+
+    public void setUdpToHttpQueue(BlockingQueue< List<NameValuePair>> queue)
+    {
+        this.udpToHttpQueue = queue;
     }
 
     @Override
@@ -48,10 +58,14 @@ public class dpeUdpHandler implements Runnable {
     {
         try
         {
-            packet.setPort(12744);
-            udpClient.addMsg(packet);
-        }catch (InterruptedException e)
+            //packet.setPort(12744);
+            //udpClient.addMsg(packet);
+
+            dpeSagmParser parser = new dpeSagmParser(packet.getData());
+
+        }catch (IllegalArgumentException e)
         {
+            logger.error("unkown format packet.",e);
             e.printStackTrace();
         }
 

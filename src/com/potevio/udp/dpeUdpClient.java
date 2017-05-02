@@ -74,7 +74,7 @@ public class dpeUdpClient extends dpeSocketBase {
                   //  dataPacketBody.setAddress(InetAddress.getByName(SAGMAINTAINENCE_ADDR));
                     dataPacketBody.setPort(SAGMAINTAINENCE_PORTNUM);
                     String dmsg = "send udp data to "+dataPacketBody.getAddress().toString()+":"+dataPacketBody.getPort();
-                    logger.debug(dmsg);
+                    logger.info(dmsg);
                     udpClient.send(dataPacketBody);
                     sleep(SOCKET_SLEEP_TIME);
                 }catch (IOException|InterruptedException e)

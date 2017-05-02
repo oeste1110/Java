@@ -8,9 +8,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.net.DatagramPacket;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by hdlsy on 2017/4/5.
@@ -18,7 +20,13 @@ import java.util.Set;
 
 public class dpeHttpHandler implements HttpHandler {
     public static String dpehandlerContext = "/dpehandler";
+    private BlockingQueue<DatagramPacket> httpToUdpQueue;
     private static Logger logger = Logger.getLogger(dpeHttpHandler.class);
+
+    public void setHttpToUdpQueue(BlockingQueue<DatagramPacket> queue)
+    {
+        this.httpToUdpQueue = queue;
+    }
 
     public void handle(HttpExchange exchange) throws IOException
     {
