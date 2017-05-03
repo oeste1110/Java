@@ -16,6 +16,7 @@ public abstract class dpeParser {
         REG_REQUEST,
         REG_RESPONSE,
         SAGM_DPE_DATA,
+        SAGM_DPE_TRANS,
         DPE_SAGM_DATA,
         WEB_DPE_DATA,
         DPE_WEB_DATA
@@ -35,6 +36,11 @@ public abstract class dpeParser {
     public void setPktType(PACKET_TYPE pkttype)
     {
         this.pktType = pkttype;
+    }
+
+    public byte[] getDataBuffer()
+    {
+        return dataBuffer;
     }
 
     public void setdataBuffer(byte[] data,int headerLen)

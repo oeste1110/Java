@@ -53,4 +53,29 @@ public interface common {
     public final static int HTTP_BADGATEWAY = 502;
     public final static int HTTP_UDP_QUEUE_SIZE = 100;
     public final static int UDP_HTTP_QUEUE_SIZE = 100;
+    public final static int UE_ONLINE = 1;
+    public final static int UE_OFFLINE = 0;
+    public final static long[] mask = { 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000 };
+
+    public static String bytesIp2String(long ip)
+    {
+        final StringBuilder ipAddress = new StringBuilder();
+        for (int i = 0; i < mask.length; i++) {
+            ipAddress.insert(0, (ip & mask[i]) >> (i * 8));
+            if (i < mask.length - 1) {
+                ipAddress.insert(0, ".");
+            }
+        }
+        return ipAddress.toString();
+    }
+
+    public static int bytes2Int(byte[] bytes)
+    {
+        int intVal;
+        intVal = (int) ( ((bytes[0] & 0xFF)<<24)
+                |((bytes[1] & 0xFF)<<16)
+                |((bytes[2] & 0xFF)<<8)
+                |(bytes[3] & 0xFF));
+        return intVal;
+    }
 }

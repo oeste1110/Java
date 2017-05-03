@@ -20,13 +20,13 @@ import java.util.concurrent.BlockingQueue;
 
 public class dpeHttpHandler implements HttpHandler {
     public static String dpehandlerContext = "/dpehandler";
-    private BlockingQueue<DatagramPacket> httpToUdpQueue;
+   // private BlockingQueue<DatagramPacket> httpToUdpQueue;
     private static Logger logger = Logger.getLogger(dpeHttpHandler.class);
 
-    public void setHttpToUdpQueue(BlockingQueue<DatagramPacket> queue)
+    /*public void setHttpToUdpQueue(BlockingQueue<DatagramPacket> queue)
     {
         this.httpToUdpQueue = queue;
-    }
+    }*/
 
     public void handle(HttpExchange exchange) throws IOException
     {

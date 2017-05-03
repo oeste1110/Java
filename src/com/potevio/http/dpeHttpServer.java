@@ -32,7 +32,7 @@ public class dpeHttpServer implements Runnable{
         //startHttpServer();
     };
 
-    public void startHttpServer(BlockingQueue<DatagramPacket> queue)
+    public void startHttpServer()
     {
         if(httpServer != null)
         {
@@ -41,7 +41,7 @@ public class dpeHttpServer implements Runnable{
         }
         try {
             dpeHttpHandler handler = new dpeHttpHandler();
-            handler.setHttpToUdpQueue(queue);
+           // handler.setHttpToUdpQueue(queue);
             httpServer = HttpServer.create(new InetSocketAddress(common.SERVER_BINDADDR, common.SERVER_PORTNUM), common.SERVER_MAX_CONNUM);
             httpServer.createContext(dpeHttpHandler.dpehandlerContext,handler);
             httpServer.setExecutor(Executors.newCachedThreadPool());

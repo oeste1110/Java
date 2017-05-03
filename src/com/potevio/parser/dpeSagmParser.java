@@ -3,12 +3,9 @@ package com.potevio.parser;
 import java.util.BitSet;
 import java.util.Vector;
 
-import static com.potevio.common.BITS_PER_BYTES;
-import static com.potevio.parser.dpeParser.PACKET_TYPE.REG_REQUEST;
-import static com.potevio.parser.dpeParser.PACKET_TYPE.REG_RESPONSE;
-import static com.potevio.parser.dpeParser.PACKET_TYPE.SAGM_DPE_DATA;
-import static com.potevio.parser.dpeSagmParser.SAGM_DPE_DATA_FLAG.BUSS_DATA_DOWN;
-import static com.potevio.parser.dpeSagmParser.SAGM_DPE_DATA_FLAG.BUSS_DATA_OUTSIDE;
+import static com.potevio.common.*;
+import static com.potevio.parser.dpeParser.PACKET_TYPE.*;
+import static com.potevio.parser.dpeSagmParser.SAGM_DPE_DATA_FLAG.*;
 
 /**
  * Created by oeste on 2017/4/29.
@@ -26,14 +23,17 @@ public class dpeSagmParser extends dpeParser {
     private final static String SAGM_REQ_RESPONSE = "A0";
     private final static String SAGM_REQ_REQUEST = "D0";
     private final static String SAGM_DATA_UP = "A3";
+    private final static String SAGM_DATA_TRANS = "A4";
     private final static String SAGM_DATA_DOWN = "D1";
+    private String ueIp = "";
+    private int ueStatus = 0;
 
     public enum SAGM_DPE_DATA_FLAG
     {
         BUSS_DATA_UP,
         BUSS_DATA_DOWN,
         BUSS_DATA_OUTSIDE,
-        BUSS_DATA_INSIDE
+        BUSS_DATA_INSIDE,
     }
 
     public dpeSagmParser()
@@ -53,9 +53,9 @@ public class dpeSagmParser extends dpeParser {
 
     private final void parseHeader() throws IllegalArgumentException
     {
-        Vector<String> hexVec = null;
+        Vector<String> hexVec = new Vector<>();
         BitSet verBitSet = new BitSet(BITS_PER_BYTES);
-        int bitIndex = 0;
+        //int bitIndex = 0;
 
         for(int i = 0;i<PARSEABLE_HEADER_LENGTH;i++)
         {
@@ -64,11 +64,11 @@ public class dpeSagmParser extends dpeParser {
             {
                 hex = '0'+hex;
             }
-            hex.toUpperCase();
+            hex = hex.toUpperCase();
             hexVec.add(hex);
         }
 
-        if(SAGM_FLAG1 == hexVec.get(0) && SAGM_FLAG2 == hexVec.get(1))
+        if(hexVec.get(0).equals(SAGM_FLAG1) && hexVec.get(1).equals(SAGM_FLAG2))
         {
             switch (hexVec.get(2))
             {
@@ -77,25 +77,41 @@ public class dpeSagmParser extends dpeParser {
                     break;
                 case SAGM_DATA_UP:
                     this.pktType = SAGM_DPE_DATA;
+                    ueIp = bytesIp2String(bytes2Int(dataBuffer));
                     break;
+                case SAGM_DATA_TRANS:
+                    this.pktType = SAGM_DPE_TRANS;
+                    ueIp = bytesIp2String(bytes2Int(dataBuffer));
+                    ueStatus = dataBuffer[4] == 1?UE_ONLINE:UE_OFFLINE;
+                    return;
                 default:
                     throw new IllegalArgumentException("wrong pkttype value.");
             }
         }else
             throw new IllegalArgumentException("wrong flag value.");
 
-        for(int i = BITS_PER_BYTES;i>0;i--)
+       /* for(int i = BITS_PER_BYTES;i>0;i--)
         {
-            verBitSet.set(bitIndex,((headBuffer[PARSEABLE_HEADER_LENGTH] & 1<<i)>>i) == 1?true:false);
+            verBitSet.set(bitIndex,((headBuffer[PARSEABLE_HEADER_LENGTH] & 1<<i-1)>>i-1) == 1?true:false);
             bitIndex++;
-        }
+        }*/
 
-        if(verBitSet.get(VER0_INDEX) == true)
-        {
-            ver0Flag = SAGM_DPE_DATA_FLAG.BUSS_DATA_UP;
-            ver1Flag = verBitSet.get(VER1_INDEX)? BUSS_DATA_OUTSIDE:SAGM_DPE_DATA_FLAG.BUSS_DATA_INSIDE;
-        }else
-            throw new IllegalArgumentException("wrong ver1 value:downward");
+       // if(/*verBitSet.get(VER0_INDEX) == true*/dataBuffer[5] == 1)
+      //  {
+            ver0Flag = dataBuffer[5] == 1?BUSS_DATA_UP:BUSS_DATA_DOWN;
+            ver1Flag = dataBuffer[6] == 1?BUSS_DATA_OUTSIDE:BUSS_DATA_INSIDE;
+      //  }else
+      //      throw new IllegalArgumentException("wrong ver1 value:downward");
+    }
+
+    public String getUeIp()
+    {
+        return ueIp;
+    }
+
+    public int getUeStatue()
+    {
+        return ueStatus;
     }
 
     public void setVer0Flag(SAGM_DPE_DATA_FLAG flag)

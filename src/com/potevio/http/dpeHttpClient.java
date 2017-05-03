@@ -27,11 +27,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
-import static com.potevio.common.HTTP_OK;
-import static com.potevio.common.HTTP_BADGATEWAY;
-import static com.potevio.common.HTTP_NOTFOUND;
+import static com.potevio.common.*;
 import static com.potevio.common.returnInfo.*;
+import static java.lang.Thread.sleep;
 
 
 /**
@@ -42,7 +42,10 @@ public class dpeHttpClient implements Runnable{
     private static final dpeHttpClient dpeClient = new dpeHttpClient();
     private RequestConfig requestConfig = null;
     private LaxRedirectStrategy redirectStrategy = null;
+    private BlockingQueue<List<NameValuePair>> udpToHttpQueue;
+    private static boolean stopFlag = false;
     private static Logger logger = Logger.getLogger(dpeHttpClient.class);
+
 
     public static dpeHttpClient getClientInstance()
     {
@@ -60,6 +63,16 @@ public class dpeHttpClient implements Runnable{
         //设置单个路由最大连接数量
         httpClientConnectionManager.setDefaultMaxPerRoute(common.CLIENT_MAX_CONNUM_PERROUTE);
         logger.debug("HttpClient init success.");
+    }
+
+    public void setUdpToHttpQueue(BlockingQueue<List<NameValuePair>> queue)
+    {
+        udpToHttpQueue = queue;
+    }
+
+    public void stopHttpClient()
+    {
+        stopFlag = true;
     }
 
     static HttpRequestRetryHandler retryHandler = new HttpRequestRetryHandler() {
@@ -160,6 +173,26 @@ public class dpeHttpClient implements Runnable{
     public void run()
     {
         initHttpClient();
+        while(!stopFlag)
+        {
+            if(!udpToHttpQueue.isEmpty())
+            {
+
+                try
+                {
+                    List<NameValuePair> pair = udpToHttpQueue.take();
+                    logger.debug("prepare sending message to webserver.");
+                    sendPost(WEBSERVER_ACTIONNAME,pair);
+                    sleep(10);
+                }catch (InterruptedException e)
+                {
+                   // String errormsg = " send packet error: "+dataPacketBody.getData().toString();
+                    //logger.error(errormsg,e);
+                    continue;
+                }
+            }
+
+        }
 
     }
 

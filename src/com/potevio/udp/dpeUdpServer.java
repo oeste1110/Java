@@ -65,7 +65,7 @@ public class dpeUdpServer extends dpeSocketBase {
         }
         socketFlag = SOCKET_RUNNING;
         dpeUdpHandler udpHandler = new dpeUdpHandler(dataQueue,()-> getSocketFlag());
-        udpHandler.setUdpToHttpQueue(udpToHttpQueue);
+        //udpHandler.setUdpToHttpQueue(udpToHttpQueue);
         Thread workhandler = new Thread(udpHandler);
         workhandler.start();
         logger.debug("udpserver start.");
