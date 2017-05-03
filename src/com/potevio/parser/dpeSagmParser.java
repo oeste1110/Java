@@ -16,6 +16,7 @@ public class dpeSagmParser extends dpeParser {
     private SAGM_DPE_DATA_FLAG ver1Flag;
     private final static int PARSEABLE_HEADER_LENGTH = 3;
     private final static int HEADER_LENGTH = 4;
+    private final static int INFO_LENGTH = 8;
     private final static int VER1_INDEX = 6;
     private final static int VER0_INDEX = 7;
     private final static String SAGM_FLAG1 = "DF";
@@ -27,6 +28,7 @@ public class dpeSagmParser extends dpeParser {
     private final static String SAGM_DATA_DOWN = "D1";
     private String ueIp = "";
     private int ueStatus = 0;
+    private short ueSeqNum = 0;
 
     public enum SAGM_DPE_DATA_FLAG
     {
@@ -98,8 +100,9 @@ public class dpeSagmParser extends dpeParser {
 
        // if(/*verBitSet.get(VER0_INDEX) == true*/dataBuffer[5] == 1)
       //  {
-            ver0Flag = dataBuffer[5] == 1?BUSS_DATA_UP:BUSS_DATA_DOWN;
-            ver1Flag = dataBuffer[6] == 1?BUSS_DATA_OUTSIDE:BUSS_DATA_INSIDE;
+            ver0Flag = dataBuffer[4] == 1?BUSS_DATA_UP:BUSS_DATA_DOWN;
+            ver1Flag = dataBuffer[5] == 1?BUSS_DATA_OUTSIDE:BUSS_DATA_INSIDE;
+            ueSeqNum = (short)((dataBuffer[6] & 0xFF)|(dataBuffer[7] & 0xFF));
       //  }else
       //      throw new IllegalArgumentException("wrong ver1 value:downward");
     }
@@ -146,8 +149,8 @@ public class dpeSagmParser extends dpeParser {
         packet[0] = Byte.decode("0x"+SAGM_FLAG1);
         packet[1] = Byte.decode("0x"+SAGM_FLAG2);
         packet[2] = pktType == REG_REQUEST?Byte.decode("0x"+SAGM_REQ_REQUEST):Byte.decode("0x"+SAGM_DATA_DOWN);
-
-        verBitSet.clear();
+        packet[3] = headBuffer[3];
+        /*verBitSet.clear();
         if(BUSS_DATA_DOWN == ver0Flag)
             verBitSet.set(VER0_INDEX,true);
         if(BUSS_DATA_OUTSIDE == ver1Flag)
@@ -156,10 +159,10 @@ public class dpeSagmParser extends dpeParser {
         {
             offset = BITS_PER_BYTES -1 - i%BITS_PER_BYTES;
             packet[3] |= (verBitSet.get(i)?1:0)<<offset;
-        }
+        }*/
 
         System.arraycopy(packet,HEADER_LENGTH,dataBuffer,0,dataBuffer.length);
-
+        packet[4] = 0; //down
         return packet;
     }
 }

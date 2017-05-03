@@ -36,9 +36,10 @@ public class dpeHttpHandler implements HttpHandler {
             InputStream inStream = exchange.getRequestBody();
             BufferedReader bodyReader = new BufferedReader(new InputStreamReader(inStream,"utf-8"));
             String bodyText = IOUtils.toString(bodyReader); //将缓冲区的内容以utf-8形式输出
-            System.out.println(bodyText);
+           // System.out.println(bodyText);
+
             try {
-                response(exchange, bodyText);
+                response(exchange);
             }catch (IOException e)
             {
                 e.printStackTrace();
@@ -48,12 +49,12 @@ public class dpeHttpHandler implements HttpHandler {
         }
     }
 
-    public void response(HttpExchange exchange,String msgbody) throws IOException
+    public void response(HttpExchange exchange) throws IOException
     {
         Headers responseHeaders = exchange.getResponseHeaders();
         responseHeaders.set("Content-Type", "text/plain");
-        OutputStream responseBody = exchange.getResponseBody();
-        responseBody.write(msgbody.getBytes());
+        //OutputStream responseBody = exchange.getResponseBody();
+       // responseBody.write(msgbody.getBytes());
         try
         {
             exchange.sendResponseHeaders(200, 0);
@@ -61,9 +62,9 @@ public class dpeHttpHandler implements HttpHandler {
         }catch (IOException e)
         {
             throw e;
-        }finally {
+        }/*finally {
             responseBody.flush();
             responseBody.close();
-        }
+        }*/
     }
 }

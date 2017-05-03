@@ -6,7 +6,7 @@ import com.potevio.parser.bean.Afn00F1Dl;
 import com.potevio.parser.bean.PacketBase;
 import com.potevio.parser.dpeParser;
 import com.potevio.parser.dpeSagmParser;
-import net.sf.json.JSONObject;
+//import net.sf.json.JSONObject;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
@@ -21,6 +21,8 @@ import static com.potevio.common.HTTP_UDP_QUEUE_SIZE;
 import static com.potevio.common.UDP_HTTP_QUEUE_SIZE;
 import static com.potevio.common.WEBSERVER_ACTIONNAME;
 import static com.potevio.parser.dpeParser.PACKET_TYPE.SAGM_DPE_TRANS;
+import static com.potevio.parser.dpeSagmParser.HEADER_LENGTH;
+import static com.potevio.parser.dpeSagmParser.SAGM_DPE_DATA_FLAG.BUSS_DATA_DOWN;
 import static com.potevio.parser.dpeSagmParser.SAGM_DPE_DATA_FLAG.BUSS_DATA_OUTSIDE;
 import static com.potevio.parser.dpeSagmParser.SAGM_DPE_DATA_FLAG.BUSS_DATA_UP;
 
@@ -49,7 +51,7 @@ public class dpeProcedureProcessor {
         switch (parser.getPktType())
         {
             case SAGM_DPE_TRANS:
-                sagParser = (dpeSagmParser)parser;
+                //sagParser = (dpeSagmParser)parser;
                 NameValuePair ueIpPair = new BasicNameValuePair("ueIp", /*sagParser.getUeIp()*/"test");
                 NameValuePair ueStatusPair = new BasicNameValuePair("ueStatus", /*String.valueOf(sagParser.getUeStatue())*/"test");
                 pairs.add(ueIpPair);
@@ -71,12 +73,14 @@ public class dpeProcedureProcessor {
             case WEB_DPE_DATA:
                 //sendToSagMaintaince();
                 break;
+           /* case DPE_WEB_DATA:
+                break;*/
             default:
                 break;
         }
     }
 
-    public class pktPair<T,V>
+    /*public class pktPair<T,V>
     {
         private T t;
         private V v;
@@ -106,7 +110,7 @@ public class dpeProcedureProcessor {
             this.v = v;
         }
 
-    }
+    }*/
 
     private void addU2HQueue(List<NameValuePair> pairs)
     {
@@ -153,26 +157,38 @@ public class dpeProcedureProcessor {
                 NameValuePair pair = new BasicNameValuePair("test1", "value1");
                 pairs.add(pair);
                 addU2HQueue(pairs);
-                sendConfirmPkt(pktbase,parser);
+                sendConfirmPkt(parser);
                 break;
             case HEARTBEAT_PACKET_CLASSNAME:
-                sendConfirmPkt(pktbase,parser);
+                sendConfirmPkt(parser);
                 break;
-            case INTERROGATION_REQUEST_CLASSNAME:
-                break;
+           /*case INTERROGATION_REQUEST_CLASSNAME:
+
+                break;*/
             case INTERROGATION_RESPONSE_CLASSNAME:
+                NameValuePair ipPair = new BasicNameValuePair("ueIp", parser.getUeIp());
+                String dataStr = new String(parser.toBytes());
+                NameValuePair dataPair = new BasicNameValuePair("data", dataStr);//todo delete header
+                pairs.add(ipPair);
+                pairs.add(dataPair);
+                addU2HQueue(pairs);
                 break;
             default:
                 break;
         }
     }
 
-    private void sendConfirmPkt(PacketBase basePkt,dpeSagmParser parser)
+    private void sendConfirmPkt(dpeSagmParser parser)
     {
         DatagramPacket pakcet;
+        byte[] newDataBuffer,oriDataBuffer;
         PacketBase confirmPkt = new PacketBase(parser.getDataBuffer(),(byte)1,"1");
         byte[] pktBytes = confirmPkt.ToBytes();
-        pakcet = new DatagramPacket(pktBytes,pktBytes.length);
+        newDataBuffer = new byte[pktBytes.length+87];
+        oriDataBuffer = parser.toBytes();
+        System.arraycopy(oriDataBuffer,0,newDataBuffer,0,8);
+        System.arraycopy(pktBytes,0,newDataBuffer,8,pktBytes.length);
+        pakcet = new DatagramPacket(newDataBuffer,newDataBuffer.length);
         addH2UQueue(pakcet);
     }
 

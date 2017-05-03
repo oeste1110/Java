@@ -1,7 +1,7 @@
 package com.potevio.http;
 
 import com.potevio.common;
-import net.sf.json.JSONObject;
+//import net.sf.json.JSONObject;
 import org.apache.http.*;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
@@ -62,6 +62,7 @@ public class dpeHttpClient implements Runnable{
        // httpClientConnectionManager.setSocketConfig(host,config);
         //设置单个路由最大连接数量
         httpClientConnectionManager.setDefaultMaxPerRoute(common.CLIENT_MAX_CONNUM_PERROUTE);
+        setRequestConfigAndRedirectStrategy();
         logger.debug("HttpClient init success.");
     }
 
@@ -125,13 +126,14 @@ public class dpeHttpClient implements Runnable{
                                     .build();
     }
 
-    public common.returnInfo sendPost(String url, /*String msgbody*/List<NameValuePair> msgpairs)
+    public void sendPost(String url, /*String msgbody*/List<NameValuePair> msgpairs)
     {
         if(url == null || !url.startsWith("http")||url.isEmpty())
         {
             String logmsg = String.format("wrong url format: %s",url);
             logger.error(logmsg);
-            return HTTP_URL_WRONGTYPE;
+            //return HTTP_URL_WRONGTYPE;
+            return;
         }
 
         HttpPost httppost = null;
@@ -153,7 +155,8 @@ public class dpeHttpClient implements Runnable{
         {
             e.printStackTrace();
             logger.error("build post error",e);
-            return HTTP_URL_WRONGTYPE;
+            //return HTTP_URL_WRONGTYPE;
+            return;
         }
             addReqHeader(httppost);
         try
@@ -163,10 +166,12 @@ public class dpeHttpClient implements Runnable{
         {
             e.printStackTrace();
             logger.error("post data error",e);
-            return HTTP_CLIENT_POSTFAIL;
+            //return HTTP_CLIENT_POSTFAIL;
+            return;
         }
         logger.debug("post data success");
-        return dealResponse(response);
+        //return dealResponse(response);
+        dealResponse(response);
     }
 
     @Override
@@ -211,25 +216,32 @@ public class dpeHttpClient implements Runnable{
 
 
 
-    private common.returnInfo dealResponse(CloseableHttpResponse response)
+    private void dealResponse(CloseableHttpResponse response)
     {
-        int statusCode = response.getStatusLine().getStatusCode();
-        switch (statusCode)
-        {
-            case HTTP_OK:
-                //HttpEntity entity = response.getEntity();
-                logger.info("web server received.");
-                break;
-            case HTTP_NOTFOUND:
-                logger.error("can not contact with web server.");
-                return HTTP_WEBSERVER_NOTFOUND;
-            case HTTP_BADGATEWAY:
-                logger.error("web server badgateway.");
-                return HTTP_WEBSERVER_BADGATEWAY;
-            default:
-                return HTTP_WEBSERVER_UNKNOWNRESPONSE;
-        }
-        return SUCCESS;
+        Thread responseThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int statusCode = response.getStatusLine().getStatusCode();
+                switch (statusCode)
+                {
+                    case HTTP_OK:
+                        //HttpEntity entity = response.getEntity();
+                        logger.info("web server received.");
+                        break;
+                    case HTTP_NOTFOUND:
+                        logger.error("can not contact with web server.");
+                        break;
+                    case HTTP_BADGATEWAY:
+                        logger.error("web server badgateway.");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+        responseThread.start();
+
+       // return SUCCESS;
     }
 
     public static void main(String[] args)
@@ -237,9 +249,9 @@ public class dpeHttpClient implements Runnable{
         String url = "http://10.3.19.17:8080/SagTest/DpeClient";
         dpeHttpClient httpClient = dpeHttpClient.getClientInstance();
         httpClient.initHttpClient();
-        JSONObject postData = new JSONObject();
+       /* JSONObject postData = new JSONObject();
         postData.put("result1","test1");
-        postData.put("result2","test2");
+        postData.put("result2","test2");*/
 
         //common.returnInfo ret = httpClient.sendPost(url,postData.toString());
         List<NameValuePair> pairs = new ArrayList<NameValuePair>();
@@ -249,7 +261,7 @@ public class dpeHttpClient implements Runnable{
         pairs.add(pair1);
         pairs.add(pair2);
         pairs.add(pair3);
-        common.returnInfo ret = httpClient.sendPost(url,pairs);
+        httpClient.sendPost(url,pairs);
 
     }
 }

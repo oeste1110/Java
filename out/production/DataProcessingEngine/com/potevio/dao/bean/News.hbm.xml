@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2017-3-24 15:29:15 by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.potevio.dao.bean.News" table="NEWS">
+        <id name="Id" type="int">
+            <column name="ID" />
+            <generator class="assigned" />
+        </id>
+        <property name="Title" type="java.lang.String">
+            <column name="TITLE" />
+        </property>
+        <property name="Content" type="java.lang.String">
+            <column name="CONTENT" />
+        </property>
+    </class>
+</hibernate-mapping>
