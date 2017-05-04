@@ -12,6 +12,7 @@ import org.apache.http.NameValuePair;
 import org.apache.log4j.Logger;
 
 import static com.potevio.common.*;
+import static com.potevio.parser.dpeSagmParser.SAGM_REQ_RESPONSE;
 import static java.lang.Thread.sleep;
 
 /**
@@ -20,6 +21,7 @@ import static java.lang.Thread.sleep;
 public class dpeUdpServer extends dpeSocketBase {
     private DatagramSocket udpServer;
     private boolean isInitialed = false;
+    private boolean isRegisted = false;
     private BlockingQueue<List<NameValuePair>> udpToHttpQueue;
     private static Logger logger = Logger.getLogger(dpeUdpServer.class);
 
@@ -54,6 +56,15 @@ public class dpeUdpServer extends dpeSocketBase {
     {
         socketFlag = SOCKET_CLOSED;
     }*/
+    public void setRegisted(boolean isRegisted)
+    {
+        isRegisted = true;
+    }
+
+    public boolean getisRegisted()
+    {
+        return isRegisted;
+    }
 
     @Override
     public void run()
@@ -63,14 +74,21 @@ public class dpeUdpServer extends dpeSocketBase {
             logger.error("can not start receiving socket without initialization.");
             return;
         }
+
         socketFlag = SOCKET_RUNNING;
         dpeUdpHandler udpHandler = new dpeUdpHandler(dataQueue,()-> getSocketFlag());
         //udpHandler.setUdpToHttpQueue(udpToHttpQueue);
         Thread workhandler = new Thread(udpHandler);
         workhandler.start();
+        byte regByte = (byte)Integer.parseInt(SAGM_REQ_RESPONSE,16);
         logger.debug("udpserver start.");
         while(SOCKET_RUNNING ==socketFlag)
         {
+            /*if(!isRegisted)
+            {
+                dpeSleep(SOCKET_SLEEP_TIME);
+                continue;
+            }*/
             DatagramPacket dataPacketBody =  new DatagramPacket(receiveBuffer, receiveBuffer.length);
             if(dataPacketBody == null) continue;
             try
@@ -78,14 +96,23 @@ public class dpeUdpServer extends dpeSocketBase {
                 udpServer.receive(dataPacketBody);
                 logger.debug("udpserver receive packet from "+dataPacketBody.getAddress()+":"+dataPacketBody.getPort());
                 if(dataPacketBody == null) continue;
+               /* if(!isRegisted)
+                {
+                    if(dataPacketBody.getData()[2] == regByte)
+                    {
+                        logger.info("udpserver is registed.");
+                        isRegisted = true;
+                    }
+                    continue;
+                }*/
                 dataQueue.put(dataPacketBody);
-                sleep(SOCKET_SLEEP_TIME);
+                //sleep(SOCKET_SLEEP_TIME);
             }catch(IOException|InterruptedException e)
             {
                 logger.error("udpserver receive error.",e);
                 continue;
             }
-
+            dpeSleep(SOCKET_SLEEP_TIME);
         }
         logger.debug("udpserver is terminated.");
     }

@@ -92,6 +92,12 @@ public class PacketBase {
 	    	Tp = new Tp(buffer);
 	    }	    
 	}
+
+	public Vector<FnBase> getFVector()
+	{
+		return FVector;
+	}
+
 	public PacketBase(byte [] Data, byte afn, String Fn) {
 		short Temp = 0;
 		byte bTemp = 0;
@@ -404,7 +410,7 @@ public class PacketBase {
 
 
 	/**
-	 * @param tvp the tpv to set
+	 * @param tpv the tpv to set
 	 */
 	public void setTpvs(byte tpv) {
 		Tpv = tpv;

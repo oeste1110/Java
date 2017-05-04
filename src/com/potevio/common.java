@@ -36,8 +36,8 @@ public interface common {
     public final static int SERVER_MAX_CONNUM = 10; //server 队列最大数量
     public final static int CLIENT_MAX_CONNUM = 30; //client 最大连接数
     public final static int CLIENT_MAX_CONNUM_PERROUTE = 10; //client 单个路由最大连接数
-    public final static int CLIENT_CONNECT_TIMEOUT = 2000; //client 连接超时
-    public final static int CLIENT_SOCKET_TIMEOUT = 2000; //client socket超时
+    public final static int CLIENT_CONNECT_TIMEOUT = 20000; //client 连接超时 毫秒
+    public final static int CLIENT_SOCKET_TIMEOUT = 20000; //client socket超时 毫秒
     public final static int UDPSOCKET_RECVBUFFER_SIZE = 500;
     public final static int UDPSOCKET_SENDQUEUE_MAXSIZE = 20;
     public final static int UDPSOCKET_RECVQUEUE_MAXSIZE = 20;
@@ -69,6 +69,20 @@ public interface common {
         return ipAddress.toString();
     }
 
+    public static byte[] stringIp2Bytes(String ip)
+    {
+        byte[] ipBytes = new byte[4];
+        String[] ipSplits = ip.split("\\.");
+        int index = 0;
+
+        for(String ipSplit:ipSplits)
+        {
+            ipBytes[index] = (byte)Integer.parseInt(ipSplit);
+            index++;
+        }
+        return ipBytes;
+    }
+
     public static int bytes2Int(byte[] bytes)
     {
         int intVal;
@@ -78,4 +92,46 @@ public interface common {
                 |(bytes[3] & 0xFF));
         return intVal;
     }
+
+    public static void dpeSleep(int time)
+    {
+        try
+        {
+            Thread.sleep(time);
+        }catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static String bytes2HexString(byte[] b) {
+        String ret = "";
+        for (int i = 0; i < b.length; i++) {
+            String hex = Integer.toHexString(b[ i ] & 0xFF);
+            if (hex.length() == 1) {
+                hex = '0' + hex;
+            }
+            ret += hex.toUpperCase();
+        }
+        return ret;
+    }
+    public static byte charToByte(char c) {
+        return (byte) "0123456789ABCDEF".indexOf(c);
+    }
+
+    public static byte[] hexStringToBytes(String hexString) {
+        if (hexString == null || hexString.equals("")) {
+            return null;
+        }
+        hexString = hexString.toUpperCase();
+        int length = hexString.length() / 2;
+        char[] hexChars = hexString.toCharArray();
+        byte[] d = new byte[length];
+        for (int i = 0; i < length; i++) {
+            int pos = i * 2;
+            d[i] = (byte) (charToByte(hexChars[pos]) << 4 | charToByte(hexChars[pos + 1]));
+        }
+        return d;
+    }
+
 }

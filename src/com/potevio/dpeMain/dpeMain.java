@@ -6,6 +6,9 @@ import com.potevio.http.dpeHttpServer;
 import com.potevio.udp.dpeUdpClient;
 import com.potevio.udp.dpeUdpServer;
 
+import static com.potevio.common.SOCKET_SLEEP_TIME;
+import static com.potevio.common.dpeSleep;
+
 /**
  * Created by hdlsy on 2017/4/12.
  */
@@ -30,6 +33,12 @@ public class dpeMain {
         threadUdpServer.start();
         threadUdpClient.start();
         threadHttpClient.start();
+       /* while(!udpServer.getisRegisted())
+        {
+            udpClient.reg2Sag();
+            dpeSleep(SOCKET_SLEEP_TIME*100);
+        }*/
+
 
     }
 

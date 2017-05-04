@@ -196,7 +196,7 @@ public class dpeHttpClient implements Runnable{
                     continue;
                 }
             }
-
+            dpeSleep(SOCKET_SLEEP_TIME);
         }
 
     }

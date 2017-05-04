@@ -11,6 +11,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 
 import static com.potevio.common.HTTPSERVER_CLOSE_DELAYTIME;
+import static com.potevio.common.SOCKET_SLEEP_TIME;
+import static com.potevio.common.dpeSleep;
 import static java.lang.Thread.sleep;
 
 /**
@@ -80,13 +82,14 @@ public class dpeHttpServer implements Runnable{
         //startHttpServer();
         while(!stopFlag)
         {
-            try
+            /*try
             {
                 sleep(1000);
             }catch (InterruptedException e)
             {
                 e.printStackTrace();
-            }
+            }*/
+            dpeSleep(SOCKET_SLEEP_TIME);
         }
         stopHttpServer(HTTPSERVER_CLOSE_DELAYTIME);
     }

@@ -11,6 +11,9 @@ import java.net.SocketException;
 import java.util.concurrent.BlockingQueue;
 
 import static com.potevio.common.*;
+import static com.potevio.parser.dpeSagmParser.SAGM_FLAG1;
+import static com.potevio.parser.dpeSagmParser.SAGM_FLAG2;
+import static com.potevio.parser.dpeSagmParser.SAGM_REQ_REQUEST;
 import static java.lang.Thread.sleep;
 
 /**
@@ -53,6 +56,24 @@ public class dpeUdpClient extends dpeSocketBase {
         socketFlag = SOCKET_CLOSED;
     }*/
 
+   public void reg2Sag()
+   {
+       byte[] regHeader = new byte[3];
+       regHeader[0] = (byte)Integer.parseInt(SAGM_FLAG1,16);
+       regHeader[1] = (byte)Integer.parseInt(SAGM_FLAG2,16);
+       regHeader[2] = (byte)Integer.parseInt(SAGM_REQ_REQUEST,16);
+       DatagramPacket dataPacketBody = new DatagramPacket(regHeader,regHeader.length);
+       try
+       {
+           dataPacketBody.setAddress(InetAddress.getByName(SAGMAINTAINENCE_ADDR));
+           dataPacketBody.setPort(SAGMAINTAINENCE_PORTNUM);
+           udpClient.send(dataPacketBody);
+       }catch (IOException e)
+       {
+            logger.error("send reg packet fail",e);
+       }
+   }
+
     @Override
     public void run()
     {
@@ -77,7 +98,7 @@ public class dpeUdpClient extends dpeSocketBase {
                     String dmsg = "send udp data to "+dataPacketBody.getAddress().toString()+":"+dataPacketBody.getPort();
                     logger.info(dmsg);
                     udpClient.send(dataPacketBody);
-                    sleep(SOCKET_SLEEP_TIME);
+                    //sleep(SOCKET_SLEEP_TIME);
                 }catch (IOException|InterruptedException e)
                 {
                     String errormsg = "udpclient send packet error: "+dataPacketBody.getData().toString();
@@ -85,6 +106,7 @@ public class dpeUdpClient extends dpeSocketBase {
                     continue;
                 }
             }
+            dpeSleep(SOCKET_SLEEP_TIME);
         }
         logger.debug("udpclient is closed.");
     }

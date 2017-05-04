@@ -16,19 +16,25 @@ public class dpeSagmParser extends dpeParser {
     private SAGM_DPE_DATA_FLAG ver1Flag;
     private final static int PARSEABLE_HEADER_LENGTH = 3;
     private final static int HEADER_LENGTH = 4;
-    private final static int INFO_LENGTH = 8;
-    private final static int VER1_INDEX = 6;
-    private final static int VER0_INDEX = 7;
-    private final static String SAGM_FLAG1 = "DF";
-    private final static String SAGM_FLAG2 = "5B";
-    private final static String SAGM_REQ_RESPONSE = "A0";
-    private final static String SAGM_REQ_REQUEST = "D0";
-    private final static String SAGM_DATA_UP = "A3";
-    private final static String SAGM_DATA_TRANS = "A4";
-    private final static String SAGM_DATA_DOWN = "D1";
+    public final static int INFO_LENGTH = 12;
+    public final static int PKTTYPE_INDEX = 2;
+    public final static int VER1_INDEX = 8;
+    public final static int VER0_INDEX = 9;
+    public final static String SAGM_FLAG1 = "DF";
+    public final static String SAGM_FLAG2 = "5B";
+    public final static String SAGM_REQ_RESPONSE = "A0";
+    public final static String SAGM_REQ_REQUEST = "D0";
+    public final static String SAGM_DATA_UP = "A3";
+    public final static String SAGM_DATA_TRANS = "A4";
+    public final static String SAGM_DATA_DOWN = "D1";
+    public final static byte SAGM_VER1_DOWN_FLAG = 1;
+    public final static byte SAGM_VER1_UP_FLAG = 1;
+    public final static byte SAGM_VER0_OUT_FLAG = 0;
+    public final static byte SAGM_VER0_IN_FLAG = 1;
     private String ueIp = "";
     private int ueStatus = 0;
     private short ueSeqNum = 0;
+    private byte[] payloadBuffer;
 
     public enum SAGM_DPE_DATA_FLAG
     {
@@ -48,8 +54,10 @@ public class dpeSagmParser extends dpeParser {
         super();
         headBuffer = new byte[HEADER_LENGTH];
         dataBuffer = new byte[data.length-HEADER_LENGTH];
+        payloadBuffer = new byte[data.length - INFO_LENGTH];
         System.arraycopy(data,0,headBuffer,0,HEADER_LENGTH);
         System.arraycopy(data,HEADER_LENGTH,dataBuffer,0,data.length-HEADER_LENGTH);
+        System.arraycopy(data,INFO_LENGTH,payloadBuffer,0,data.length-INFO_LENGTH);
         parseHeader();
     }
 
@@ -100,8 +108,8 @@ public class dpeSagmParser extends dpeParser {
 
        // if(/*verBitSet.get(VER0_INDEX) == true*/dataBuffer[5] == 1)
       //  {
-            ver0Flag = dataBuffer[4] == 1?BUSS_DATA_UP:BUSS_DATA_DOWN;
-            ver1Flag = dataBuffer[5] == 1?BUSS_DATA_OUTSIDE:BUSS_DATA_INSIDE;
+            ver1Flag = dataBuffer[4] == 1?BUSS_DATA_DOWN:BUSS_DATA_UP;
+            ver0Flag = dataBuffer[5] == 1?BUSS_DATA_INSIDE:BUSS_DATA_OUTSIDE;
             ueSeqNum = (short)((dataBuffer[6] & 0xFF)|(dataBuffer[7] & 0xFF));
       //  }else
       //      throw new IllegalArgumentException("wrong ver1 value:downward");
@@ -137,6 +145,11 @@ public class dpeSagmParser extends dpeParser {
         return this.ver1Flag;
     }
 
+    public byte[] getPayloadBuffer()
+    {
+        return payloadBuffer;
+    }
+
     @Override
     public byte[] toBytes() throws NullPointerException
     {
@@ -146,11 +159,14 @@ public class dpeSagmParser extends dpeParser {
         byte[] packet = new byte[HEADER_LENGTH+dataBuffer.length];
         int offset = 0;
 
-        packet[0] = Byte.decode("0x"+SAGM_FLAG1);
-        packet[1] = Byte.decode("0x"+SAGM_FLAG2);
-        packet[2] = pktType == REG_REQUEST?Byte.decode("0x"+SAGM_REQ_REQUEST):Byte.decode("0x"+SAGM_DATA_DOWN);
+       // packet[0] = Byte.decode("0x"+SAGM_FLAG1);
+       // packet[1] = Byte.decode("0x"+SAGM_FLAG2);
+        packet[0] = (byte)Integer.parseInt(SAGM_FLAG1,16);
+        packet[1] = (byte)Integer.parseInt(SAGM_FLAG2,16);
+        packet[2] = pktType == REG_REQUEST?(byte)Integer.parseInt(SAGM_REQ_REQUEST,16):(byte)Integer.parseInt(SAGM_DATA_DOWN,16);
         packet[3] = headBuffer[3];
         /*verBitSet.clear();
+
         if(BUSS_DATA_DOWN == ver0Flag)
             verBitSet.set(VER0_INDEX,true);
         if(BUSS_DATA_OUTSIDE == ver1Flag)

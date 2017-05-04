@@ -61,8 +61,9 @@ public class dpeUdpHandler implements Runnable {
         {
             //packet.setPort(12744);
             //udpClient.addMsg(packet);
-
-            dpeSagmParser parser = new dpeSagmParser(packet.getData());
+            byte[] pktBytes = new byte[packet.getLength()];
+            System.arraycopy(packet.getData(),0,pktBytes,0,packet.getLength());
+            dpeSagmParser parser = new dpeSagmParser(pktBytes);
             dpeProcedureProcessor processor = new dpeProcedureProcessor(parser);
         }catch (IllegalArgumentException e)
         {
