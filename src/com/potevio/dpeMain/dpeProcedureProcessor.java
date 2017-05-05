@@ -60,21 +60,23 @@ public class dpeProcedureProcessor {
             case SAGM_DPE_TRANS:
                 sagParser = (dpeSagmParser)parser;
                 logger.info("SAGM_DPE_TRANS enter.");
-                NameValuePair ueIpPair = new BasicNameValuePair("ueIp", sagParser.getUeIp());
-                NameValuePair ueStatusPair = new BasicNameValuePair("ueStatus", String.valueOf(sagParser.getUeStatue()));
-                pairs.add(ueIpPair);
-                pairs.add(ueStatusPair);
+                //NameValuePair ueIpPair = new BasicNameValuePair("ueIp", sagParser.getUeIp());
+                //NameValuePair ueStatusPair = new BasicNameValuePair("ueStatus", String.valueOf(sagParser.getUeStatus()));
+               // pairs.add(ueIpPair);
+                NameValuePair uePair = new BasicNameValuePair("Ue", sagParser.getUeIp()+","+String.valueOf(sagParser.getUeStatus()));
+                pairs.add(uePair);
                 addU2HQueue(pairs);
                 break;
             case SAGM_DPE_DATA:
                 logger.info("SAGM_DPE_DATA enter.");
                 sagParser = (dpeSagmParser)parser;
+                logger.info("packet direction is "+(sagParser.getVer1Flag() == BUSS_DATA_UP?"UP":"DOWN"));
                 if(sagParser.getVer0Flag() == BUSS_DATA_OUTSIDE&& sagParser.getVer1Flag() == BUSS_DATA_UP)
                 {
                     //parser->obj
                     //databaseProcess(obj)
                     //sendtoWebServer(obj)
-                    PacketBase pktbase = null;/*= new PacketBase(sagParser.getDataBuffer());*/
+                    PacketBase pktbase = new PacketBase(sagParser.getPayloadBuffer());
                     dataProcess(pktbase,sagParser);
                    // sendToWebServer();
                 }
@@ -234,17 +236,25 @@ public class dpeProcedureProcessor {
 
     private void dataProcess(PacketBase pktbase,dpeSagmParser parser)
     {
-        //FnBase base = pktbase.getFVector().get(0);
-     //   String pktClassName = base.getClass().getName().replaceAll("\\w+\\.","");
+        FnBase base = pktbase.getFVector().get(0);
+        String pktClassName = base.getClass().getName().replaceAll("\\w+\\.","");
         List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-        String pktClassName = INTERROGATION_RESPONSE_CLASSNAME;
+       // String pktClassName = LOGIN_PACKET_CLASSNAME;
         switch (pktClassName)
         {
             case LOGIN_PACKET_CLASSNAME:
                 logger.info("LOGIN_PACKET_CLASSNAME enter.");
-                NameValuePair pair = new BasicNameValuePair(parser.getUeIp(), String.valueOf(parser.getUeStatue()));
+                short termS = pktbase.getTerminalEq();
+                short regionS = pktbase.getRegionalismCode();
+                byte[] termByte = new byte[4];
+                termByte[0] = (byte)(regionS >>8& 0xff);
+                termByte[1] = (byte)(regionS & 0xff);
+                termByte[2] = (byte)(termS >>8& 0xff);
+                termByte[3] = (byte)(termS & 0xff);
+                String termStr = bytes2HexString(termByte);
+                NameValuePair pair = new BasicNameValuePair("Term", termStr+",1");
                 pairs.add(pair);
-                logger.info("ip:"+parser.getUeIp()+" status:"+String.valueOf(parser.getUeStatue()));
+               // logger.info("TermAddr:"+termStr+" status:"+"1");
                 addU2HQueue(pairs);
                 sendConfirmPkt(parser);
                 break;
@@ -292,7 +302,7 @@ public class dpeProcedureProcessor {
         oriDataBuffer = parser.toBytes();
         System.arraycopy(oriDataBuffer,0,newDataBuffer,0,INFO_LENGTH);
         System.arraycopy(pktBytes,0,newDataBuffer,INFO_LENGTH,pktBytes.length);
-        newDataBuffer[PKTTYPE_INDEX] = Byte.decode("0x"+SAGM_DATA_DOWN);
+        newDataBuffer[PKTTYPE_INDEX] = (byte)Integer.parseInt(SAGM_DATA_DOWN,16);
         newDataBuffer[VER1_INDEX] = 1;
         pakcet = new DatagramPacket(newDataBuffer,newDataBuffer.length);
         addH2UQueue(pakcet);

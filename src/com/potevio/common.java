@@ -25,14 +25,14 @@ public interface common {
     }
 
     public final static int BITS_PER_BYTES = 8;
-    public final static String SERVER_BINDADDR = "10.3.19.22";
-    public final static String SAGMAINTAINENCE_ADDR = "127.0.0.1";
+    public final static String SERVER_BINDADDR = "10.3.19.67";
+    public final static String SAGMAINTAINENCE_ADDR = "10.3.19.60";//10.3.19.154
     public final static String WEBSERVER_ACTIONNAME = "http://10.3.19.17:8080/SagTest/DpeClient";
     public final static int SOCKET_CLOSED = 0;
     public final static int SOCKET_RUNNING = 1;
     public final static int SERVER_PORTNUM = 12744;
-    public final static int UDPSERVER_PORTNUM = 12745;
-    public final static int SAGMAINTAINENCE_PORTNUM = 12746;
+    public final static int UDPSERVER_PORTNUM = 10884;//12745
+    public final static int SAGMAINTAINENCE_PORTNUM = 10883;//12746
     public final static int SERVER_MAX_CONNUM = 10; //server 队列最大数量
     public final static int CLIENT_MAX_CONNUM = 30; //client 最大连接数
     public final static int CLIENT_MAX_CONNUM_PERROUTE = 10; //client 单个路由最大连接数
@@ -60,13 +60,28 @@ public interface common {
     public static String bytesIp2String(long ip)
     {
         final StringBuilder ipAddress = new StringBuilder();
+        String ipStr = "";
+        String[] ipSplit;
         for (int i = 0; i < mask.length; i++) {
             ipAddress.insert(0, (ip & mask[i]) >> (i * 8));
             if (i < mask.length - 1) {
                 ipAddress.insert(0, ".");
             }
         }
-        return ipAddress.toString();
+        //ipStr = ipAddress.toString();
+        ipSplit = ipAddress.toString().split("\\.");
+        for(int i = 0;i<4;i++)
+        {
+            int ipInt = Integer.parseInt(ipSplit[i]);
+            if(ipInt < 0)
+            {
+                ipInt += 256;
+            }
+            ipStr+=String.valueOf(ipInt);
+            if(i!=3)
+                ipStr+=".";
+        }
+        return ipStr;
     }
 
     public static byte[] stringIp2Bytes(String ip)
@@ -77,6 +92,10 @@ public interface common {
 
         for(String ipSplit:ipSplits)
         {
+            if(Integer.parseInt(ipSplit)>127)
+            {
+                ipSplit = String.valueOf(Integer.parseInt(ipSplit)-256);
+            }
             ipBytes[index] = (byte)Integer.parseInt(ipSplit);
             index++;
         }

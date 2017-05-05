@@ -26,24 +26,26 @@ public class dpeUdpClient extends dpeSocketBase {
     private DatagramSocket udpClient;
     private boolean isInitialed = false;
 
-    public dpeUdpClient()
+    public dpeUdpClient(DatagramSocket socket)
     {
         super();
         setQueueSize(HTTPSOCKET_SENDQUEUE_MAXSIZE);
         setAutoCloseTime(autoCloseTime);
-        initUdpClient();
+        initUdpClient(socket);
     }
 
-    private void initUdpClient()
+    private void initUdpClient(DatagramSocket socket)
     {
-        try
+       /* try
         {
-            udpClient = new DatagramSocket();
+            //udpClient = new DatagramSocket();
+
         }catch (SocketException e)
         {
             logger.error("init udpclient error.",e);
             return;
-        }
+        }*/
+        udpClient = socket;
         isInitialed = true;
     }
 
@@ -58,16 +60,18 @@ public class dpeUdpClient extends dpeSocketBase {
 
    public void reg2Sag()
    {
-       byte[] regHeader = new byte[3];
+       byte[] regHeader = new byte[4];
        regHeader[0] = (byte)Integer.parseInt(SAGM_FLAG1,16);
        regHeader[1] = (byte)Integer.parseInt(SAGM_FLAG2,16);
        regHeader[2] = (byte)Integer.parseInt(SAGM_REQ_REQUEST,16);
+       regHeader[3] = 0;
        DatagramPacket dataPacketBody = new DatagramPacket(regHeader,regHeader.length);
        try
        {
            dataPacketBody.setAddress(InetAddress.getByName(SAGMAINTAINENCE_ADDR));
            dataPacketBody.setPort(SAGMAINTAINENCE_PORTNUM);
            udpClient.send(dataPacketBody);
+           logger.info("send reg packet.");
        }catch (IOException e)
        {
             logger.error("send reg packet fail",e);

@@ -10,6 +10,7 @@ import org.apache.http.NameValuePair;
 import org.apache.log4j.Logger;
 
 import static com.potevio.common.SOCKET_RUNNING;
+import static com.potevio.parser.dpeSagmParser.INFO_LENGTH;
 
 /**
  * Created by hdlsy on 2017/4/13.
@@ -20,7 +21,7 @@ public class dpeUdpHandler implements Runnable {
     private BlockingQueue<DatagramPacket> dataQueue;
    // private BlockingQueue<List<NameValuePair>> udpToHttpQueue;
     private static Logger logger;
-    private dpeUdpClient udpClient = new dpeUdpClient();
+    //private dpeUdpClient udpClient = new dpeUdpClient();
 
     public dpeUdpHandler(BlockingQueue<DatagramPacket> queue,handlerInterface callback)
     {
@@ -38,8 +39,8 @@ public class dpeUdpHandler implements Runnable {
     public void run() {
         logger.debug("start udphandler thread.");
        // udpClient.setQueue(dataQueue);
-        Thread testThread = new Thread(udpClient);
-        testThread.start();
+        //Thread testThread = new Thread(udpClient);
+       // testThread.start();
 
         while(hInterface.handlerCallback() == SOCKET_RUNNING)
         {

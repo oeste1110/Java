@@ -120,7 +120,7 @@ public class dpeSagmParser extends dpeParser {
         return ueIp;
     }
 
-    public int getUeStatue()
+    public int getUeStatus()
     {
         return ueStatus;
     }
@@ -178,7 +178,8 @@ public class dpeSagmParser extends dpeParser {
         }*/
 
         System.arraycopy(packet,HEADER_LENGTH,dataBuffer,0,dataBuffer.length);
-        packet[4] = 0; //down
+        //packet[4] = 0; //down
+        System.arraycopy(stringIp2Bytes(ueIp),0,packet,4,4);
         return packet;
     }
 }

@@ -12,6 +12,7 @@ import org.apache.http.NameValuePair;
 import org.apache.log4j.Logger;
 
 import static com.potevio.common.*;
+import static com.potevio.parser.dpeSagmParser.INFO_LENGTH;
 import static com.potevio.parser.dpeSagmParser.SAGM_REQ_RESPONSE;
 import static java.lang.Thread.sleep;
 
@@ -66,6 +67,11 @@ public class dpeUdpServer extends dpeSocketBase {
         return isRegisted;
     }
 
+    public DatagramSocket getUdpServer()
+    {
+        return udpServer;
+    }
+
     @Override
     public void run()
     {
@@ -96,7 +102,10 @@ public class dpeUdpServer extends dpeSocketBase {
                 udpServer.receive(dataPacketBody);
                 logger.debug("udpserver receive packet from "+dataPacketBody.getAddress()+":"+dataPacketBody.getPort());
                 if(dataPacketBody == null) continue;
-               /* if(!isRegisted)
+                byte[] pktByte = new byte[dataPacketBody.getLength()];
+                System.arraycopy(dataPacketBody.getData(),0,pktByte,0,dataPacketBody.getLength());
+                logger.info("content of this packet is:"+bytes2HexString(pktByte));
+                /*if(!isRegisted)
                 {
                     if(dataPacketBody.getData()[2] == regByte)
                     {
@@ -105,6 +114,11 @@ public class dpeUdpServer extends dpeSocketBase {
                     }
                     continue;
                 }*/
+                if(dataPacketBody.getLength() < INFO_LENGTH)
+                {
+                    logger.error("udp packet length less than 12.");
+                    continue;
+                }
                 dataQueue.put(dataPacketBody);
                 //sleep(SOCKET_SLEEP_TIME);
             }catch(IOException|InterruptedException e)

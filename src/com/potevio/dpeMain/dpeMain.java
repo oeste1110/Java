@@ -19,7 +19,7 @@ public class dpeMain {
     {
         dpeThreadPool pool = dpeThreadPool.getPoolInstance();
         dpeUdpServer udpServer = new dpeUdpServer();
-        dpeUdpClient udpClient = new dpeUdpClient();
+        dpeUdpClient udpClient = new dpeUdpClient(udpServer.getUdpServer());
         dpeHttpServer httpServer = dpeHttpServer.getServerInstance();
         dpeHttpClient httpClient = dpeHttpClient.getClientInstance();
 
@@ -33,7 +33,10 @@ public class dpeMain {
         threadUdpServer.start();
         threadUdpClient.start();
         threadHttpClient.start();
-       /* while(!udpServer.getisRegisted())
+        dpeSleep(SOCKET_SLEEP_TIME*100);
+         udpClient.reg2Sag();
+        dpeSleep(SOCKET_SLEEP_TIME*100);
+        /*while(!udpServer.getisRegisted())
         {
             udpClient.reg2Sag();
             dpeSleep(SOCKET_SLEEP_TIME*100);
