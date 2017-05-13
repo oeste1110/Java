@@ -79,18 +79,18 @@ public class SagDbManager {
 		return sDbm;
 	}
 	
-	private void createSession()
+	public void createSession()
 	{
 		sagSession = new SagSession(sFactory.openSession());
 		ifExistsSession = true;
 	}
 	
-	public void commitSession()
+	/*public void commitSession()
 	{
 		sagSession.closeSession();
 		ifExistsSession = false;
 		sagSession = null;
-	}
+	}*/
 	
 	public void insert(Object obj)
 	{
@@ -114,9 +114,15 @@ public class SagDbManager {
         if(ifExistsSession)
         {
             sagSession.updateItem(obj);
+            //sagSession.commitSession();
         }
     }
-	
+
+    public void commit()
+    {
+        sagSession.commitSession();
+    }
+
 	public void delete(Object obj)
     {
         if(ifExistsSession)
@@ -156,13 +162,23 @@ public class SagDbManager {
         	sdbm.insert(news);*/
 
             sdbm.createSession();
-            QueryCondition qc = new QueryCondition();
-            qc.equal("param2","test2");
-            SagDbQuery query = sdbm.getQuery(Testtable1Entity.class);
-            query.addCondititon(qc);
-            List<News> result = query.getQueryList();
-            result.forEach((News news)->System.out.println(news.getTitle()+news.getContent()));
-        	
+           // QueryCondition qc = new QueryCondition();
+            //qc.equal("param2","test2");
+           // SagDbQuery query = sdbm.getQuery(Testtable1Entity.class);
+          //  query.addCondititon(qc);
+           // List<News> result = query.getQueryList();
+           // result.forEach((News news)->System.out.println(news.getTitle()+news.getContent()));
+            Testtable1Entity t1 = new Testtable1Entity();
+            t1.setParam1(1);
+            t1.setParam2("123");
+            sdbm.update(t1);
+            //sdbm.commit();
+           // sdbm.createSession();
+            Testtable1Entity t2 = new Testtable1Entity();
+            t2.setParam1(2);
+            t2.setParam2("456");
+            sdbm.update(t2);
+        	sdbm.commit();
         } catch (HibernateException e) {  
             e.printStackTrace();  
         }

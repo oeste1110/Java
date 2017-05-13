@@ -63,7 +63,7 @@ public class dpeHttpClient implements Runnable{
         //设置单个路由最大连接数量
         httpClientConnectionManager.setDefaultMaxPerRoute(common.CLIENT_MAX_CONNUM_PERROUTE);
         setRequestConfigAndRedirectStrategy();
-        logger.debug("HttpClient init success.");
+        logger.info("HttpClient init success.");
     }
 
     public void setUdpToHttpQueue(BlockingQueue<List<NameValuePair>> queue)
@@ -169,7 +169,7 @@ public class dpeHttpClient implements Runnable{
             //return HTTP_CLIENT_POSTFAIL;
             return;
         }
-        logger.debug("post data success");
+        logger.info("post data success");
         //return dealResponse(response);
         dealResponse(response);
     }

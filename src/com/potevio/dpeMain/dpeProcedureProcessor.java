@@ -2,6 +2,10 @@ package com.potevio.dpeMain;
 
 import com.google.gson.JsonObject;
 import com.potevio.common;
+import com.potevio.dao.bean.TUeInfoEntity;
+import com.potevio.dao.bean.Testtable1Entity;
+import com.potevio.dao.main.QueryCondition;
+import com.potevio.dao.main.SagDbManager;
 import com.potevio.http.dpeHttpClient;
 import com.potevio.http.dpeHttpHandler;
 import com.potevio.parser.bean.Afn00F1Dl;
@@ -39,6 +43,7 @@ public class dpeProcedureProcessor {
     private static BlockingQueue<DatagramPacket> httpToUdpQueue = new ArrayBlockingQueue<DatagramPacket>(HTTP_UDP_QUEUE_SIZE);
     public static Hashtable<String,blockBody> httpBlockTable = new Hashtable<>();
     private static Logger logger = Logger.getLogger(dpeProcedureProcessor.class);
+    private static SagDbManager sdbm  = SagDbManager.getDbManager();
     private dpeParser parser;
 
     private final static String LOGIN_PACKET_CLASSNAME = "Afn02F1Up";
@@ -178,7 +183,7 @@ public class dpeProcedureProcessor {
         {
             logger.error("httpToUdpQueue is full",e);
         }
-        logger.debug("add msg to HttpToUdpQueue:"+packetData2String(packet));
+        logger.info("add msg to HttpToUdpQueue:"+packetData2String(packet));
     }
 
     private String packetData2String(DatagramPacket packet)
@@ -230,7 +235,7 @@ public class dpeProcedureProcessor {
             headerBuffer[4+i] = ipBytes[i];
         }
         headerBuffer[VER1_INDEX] = SAGM_VER1_DOWN_FLAG;
-        headerBuffer[VER0_INDEX] = SAGM_VER0_OUT_FLAG;//?IN OR OUT
+        headerBuffer[VER0_INDEX] = SAGM_VER0_IN_FLAG;
         return headerBuffer;
     }
 
@@ -254,6 +259,29 @@ public class dpeProcedureProcessor {
                 String termStr = bytes2HexString(termByte);
                 NameValuePair pair = new BasicNameValuePair("Term", termStr+",1");
                 pairs.add(pair);
+                sdbm.createSession();
+                QueryCondition qc = new QueryCondition();
+                qc.equal("terminalAddr",termStr);
+                SagDbManager.SagDbQuery query = sdbm.getQuery(TUeInfoEntity.class);
+                query.addCondititon(qc);
+                List<TUeInfoEntity> result = query.getQueryList();
+                if(result.isEmpty())
+                {
+                    TUeInfoEntity ueInfoEntity = new TUeInfoEntity();
+                    ueInfoEntity.setTerminalAddr(termStr);
+                    ueInfoEntity.setUeImsi("222222222");
+                    ueInfoEntity.seteNodeBId(1);
+                    //todo set termainal status online
+                    sdbm.insert(ueInfoEntity);
+                }else{
+                    TUeInfoEntity ueInfoEntity = result.get(0);
+                    if(!ueInfoEntity.getUeIpAddr().equals(parser.getUeIp()))
+                    {
+                        ueInfoEntity.setUeIpAddr(parser.getUeIp());
+                        sdbm.update(ueInfoEntity);
+                        sdbm.commit();
+                    }/*else if todo judge if terminal is online*/
+                }
                // logger.info("TermAddr:"+termStr+" status:"+"1");
                 addU2HQueue(pairs);
                 sendConfirmPkt(parser);

@@ -5,11 +5,12 @@ import java.nio.ByteBuffer;
 public final class Afn0cF2Up extends FnBase {
 	private byte second;
 	private byte minute;
-	private byte hour;
+	private byte hour;//0
 	private byte day;
 	private byte week;
 	private byte month;
 	private byte year;
+
 
 	public Afn0cF2Up(ByteBuffer buffer, String Pn, String Fn) {
 		super(Pn, Fn);

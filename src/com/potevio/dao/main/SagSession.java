@@ -59,6 +59,11 @@ public class SagSession {
         sagSession.delete(obj);
     }
 
+    public void commitSession()
+	{
+		sagTranc.commit();
+	}
+
 	public void finalize()
 	{
 		if(!isClosed)

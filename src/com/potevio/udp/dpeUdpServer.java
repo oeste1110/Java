@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import static com.potevio.common.*;
 import static com.potevio.parser.dpeSagmParser.INFO_LENGTH;
+import static com.potevio.parser.dpeSagmParser.SAGM_HEARTBEAT;
 import static com.potevio.parser.dpeSagmParser.SAGM_REQ_RESPONSE;
 import static java.lang.Thread.sleep;
 
@@ -87,7 +88,8 @@ public class dpeUdpServer extends dpeSocketBase {
         Thread workhandler = new Thread(udpHandler);
         workhandler.start();
         byte regByte = (byte)Integer.parseInt(SAGM_REQ_RESPONSE,16);
-        logger.debug("udpserver start.");
+        byte hbByte = (byte)Integer.parseInt(SAGM_HEARTBEAT,16);
+        logger.info("udpserver start.");
         while(SOCKET_RUNNING ==socketFlag)
         {
             /*if(!isRegisted)
@@ -100,12 +102,12 @@ public class dpeUdpServer extends dpeSocketBase {
             try
             {
                 udpServer.receive(dataPacketBody);
-                logger.debug("udpserver receive packet from "+dataPacketBody.getAddress()+":"+dataPacketBody.getPort());
+                logger.info("udpserver receive packet from "+dataPacketBody.getAddress()+":"+dataPacketBody.getPort());
                 if(dataPacketBody == null) continue;
                 byte[] pktByte = new byte[dataPacketBody.getLength()];
                 System.arraycopy(dataPacketBody.getData(),0,pktByte,0,dataPacketBody.getLength());
                 logger.info("content of this packet is:"+bytes2HexString(pktByte));
-                /*if(!isRegisted)
+                if(!isRegisted)
                 {
                     if(dataPacketBody.getData()[2] == regByte)
                     {
@@ -113,7 +115,12 @@ public class dpeUdpServer extends dpeSocketBase {
                         isRegisted = true;
                     }
                     continue;
-                }*/
+                }
+                if(dataPacketBody.getData()[2] == hbByte)
+                {
+                    udpServer.send(dataPacketBody);
+                    continue;
+                }
                 if(dataPacketBody.getLength() < INFO_LENGTH)
                 {
                     logger.error("udp packet length less than 12.");

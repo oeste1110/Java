@@ -25,8 +25,8 @@ public interface common {
     }
 
     public final static int BITS_PER_BYTES = 8;
-    public final static String SERVER_BINDADDR = "10.3.19.67";
-    public final static String SAGMAINTAINENCE_ADDR = "10.3.19.60";//10.3.19.154
+    public final static String SERVER_BINDADDR = "127.0.0.1";
+    public final static String SAGMAINTAINENCE_ADDR = "10.3.19.22";//10.3.19.154
     public final static String WEBSERVER_ACTIONNAME = "http://10.3.19.17:8080/SagTest/DpeClient";
     public final static int SOCKET_CLOSED = 0;
     public final static int SOCKET_RUNNING = 1;

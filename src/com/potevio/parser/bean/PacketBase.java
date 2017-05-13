@@ -38,7 +38,6 @@ public class PacketBase {
     Vector<FnBase> FVector;
     private EC Ec;
     private Tp Tp;
-	
 	public PacketBase(byte [] Data) {
 		// TODO Auto-generated constructor stub
 		short Temp = 0;
@@ -133,6 +132,8 @@ public class PacketBase {
 		String json = null;
 		Gson gson=new Gson();
 		json = gson.toJson(this);
+		//for()
+
 		//for (int i = 0; i < FVector.size(); i++){
 		//	json += FVector.elementAt(i).ToJson();
 		//}

@@ -86,7 +86,7 @@ public class dpeUdpClient extends dpeSocketBase {
             logger.error("can not start receiving socket without initialization.");
             return;
         }
-        logger.debug("udpclient is started.");
+        logger.info("udpclient is started.");
         DatagramPacket dataPacketBody = null;
         socketFlag = SOCKET_RUNNING;
         while(SOCKET_RUNNING == socketFlag)

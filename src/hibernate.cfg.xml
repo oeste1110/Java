@@ -20,18 +20,20 @@
       <property name="c3p0.idle_test_period">120</property>
 
       <!-- 配置hibernate的基本信息 -->
-      <property name="connection.url">jdbc:mysql://localhost:3306/hibernate_test</property>
+       <property name="connection.url">jdbc:mysql://10.3.19.60:3306/sagweb</property>
+      <!-- <property name="connection.url">jdbc:mysql://127.0.0.1:3306/hibernate_test</property>-->
       <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-      <property name="connection.username">root</property>
-      <property name="connection.password">huang123</property>
+       <property name="connection.username">root</property>
+       <property name="connection.password">mysql</property>
+      <!--<property name="connection.username">root</property>
+      <property name="connection.password">huang123</property>-->
 
       <!-- 配置数据库方言dialect -->
       <property name="dialect">org.hibernate.dialect.MySQL5InnoDBDialect</property>
 
       <mapping class="com.potevio.dao.bean.Testtable1Entity"/>
       <mapping class="com.potevio.dao.bean.Testtable2Entity"/>
-
-
+      <mapping class="com.potevio.dao.bean.TUeInfoEntity"/>
 
 
   </session-factory>

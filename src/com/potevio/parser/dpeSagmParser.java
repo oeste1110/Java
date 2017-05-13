@@ -27,6 +27,7 @@ public class dpeSagmParser extends dpeParser {
     public final static String SAGM_DATA_UP = "A3";
     public final static String SAGM_DATA_TRANS = "A4";
     public final static String SAGM_DATA_DOWN = "D1";
+    public final static String SAGM_HEARTBEAT = "F1";
     public final static byte SAGM_VER1_DOWN_FLAG = 1;
     public final static byte SAGM_VER1_UP_FLAG = 1;
     public final static byte SAGM_VER0_OUT_FLAG = 0;
